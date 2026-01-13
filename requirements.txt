@@ -1,11 +1,10 @@
-numpy<2
-torch==2.1.2+cpu
---extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0+cu121
+--extra-index-url https://download.pytorch.org/whl/cu121
 
-diffusers==0.24.0
-transformers==4.36.2
-accelerate==0.25.0
-huggingface-hub==0.19.4
+diffusers==0.31.0
+transformers==4.37.2
+accelerate==0.27.0
+huggingface-hub==0.23.0
 safetensors
 Pillow
 gradio
