@@ -1,17 +1,16 @@
 import torch
-from diffusers import QwenImageEditPlusPipeline
+from diffusers import DiffusionPipeline
 from PIL import Image
 import gradio as gr
 import subprocess
 
-# Carica modello
-pipe = QwenImageEditPlusPipeline.from_pretrained(
+# Carica il modello Qwen (usa la pipeline generica)
+pipe = DiffusionPipeline.from_pretrained(
     "Qwen/Qwen-Image-Edit-2509",
     torch_dtype=torch.float16,
 )
 pipe = pipe.to("cuda")
 
-# Funzione principale
 def edit_multi_image(img_main, img_outfit, img_pose, prompt, steps, guidance):
     if img_main is None:
         return None
@@ -21,10 +20,13 @@ def edit_multi_image(img_main, img_outfit, img_pose, prompt, steps, guidance):
         if img is not None:
             images.append(img.convert("RGB"))
 
+    # Se c'è solo una immagine → singolo input, altrimenti lista
+    image_input = images[0] if len(images) == 1 else images
+
     with torch.autocast("cuda"):
         result = pipe(
             prompt=prompt,
-            image=images,
+            image=image_input,
             num_inference_steps=steps,
             guidance_scale=guidance,
         )
@@ -50,15 +52,14 @@ def preset_prodotto():
         "alta nitidezza, resa commerciale e dettagli chiari."
     )
 
-# GPU monitoring
+# Monitor GPU
 def gpu_status():
     try:
-        output = subprocess.check_output(["nvidia-smi"], text=True)
-        return output
+        out = subprocess.check_output(["nvidia-smi"], text=True)
+        return out
     except Exception as e:
         return f"Errore nel leggere nvidia-smi: {e}"
 
-# Interfaccia
 with gr.Blocks(title="Qwen Image Edit – Multi Image + Preset + GPU Monitor") as ui:
     gr.Markdown("## Qwen Image Edit – Multi‑Image con Preset e Monitor GPU")
 
